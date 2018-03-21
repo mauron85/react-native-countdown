@@ -155,18 +155,20 @@ public class NeonCountDownView extends LinearLayout {
     }
 
     private void setClock(long millisInFuture) {
-        int secondsInFuture = (int) Math.floor(millisInFuture / 1000);
-        int hours = (int) Math.floor(secondsInFuture / HOUR_IN_SECONDS);
-        int hours12 = (int) Math.min(hours, 12);
-        int minutes = (int) Math.floor((secondsInFuture - hours * HOUR_IN_SECONDS) / 60);
-        int seconds = (int) secondsInFuture % 60;
+        if (millisInFuture != mCurrentMillisInFuture) {
+            int secondsInFuture = (int) Math.floor(millisInFuture / 1000);
+            int hours = (int) Math.floor(secondsInFuture / HOUR_IN_SECONDS);
+            int hours12 = (int) Math.min(hours, 12);
+            int minutes = (int) Math.floor((secondsInFuture - hours * HOUR_IN_SECONDS) / 60);
+            int seconds = (int) secondsInFuture % 60;
 
-        mClock = new int[]{seconds, minutes, hours12, hours};
+            mCurrentMillisInFuture = millisInFuture;
+            mClock = new int[]{seconds, minutes, hours12, hours};
+        }
     }
 
     public void setMillisInFuture(long millisInFuture) {
         mMillisInFuture = millisInFuture;
-        mCurrentMillisInFuture = millisInFuture;
         render(millisInFuture);
     }
 
@@ -201,7 +203,6 @@ public class NeonCountDownView extends LinearLayout {
 
         mCountDownTimer = new CountDownTimer(mCurrentMillisInFuture, mIntervalMillis) {
             public void onTick(long millisUntilFinished) {
-                mCurrentMillisInFuture = millisUntilFinished;
                 render(millisUntilFinished);
             }
 
