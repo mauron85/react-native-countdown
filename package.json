@@ -6,6 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mauron85/react-native-countdown.git"
+  },
   "author": "mauron85",
   "license": "Apache-2.0",
   "peerDependencies": {
