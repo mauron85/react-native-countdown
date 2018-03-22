@@ -15,16 +15,9 @@ import java.util.List;
  */
 
 public class RCTCountDownPackage implements ReactPackage {
-    private RCTCountDownViewManager mCountDownViewManager;
-
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-        if (mCountDownViewManager == null) {
-            mCountDownViewManager = new RCTCountDownViewManager(reactContext);
-        }
-        return Arrays.<NativeModule>asList(
-            new RCTCountDownModule(reactContext, mCountDownViewManager)
-        );
+        return Collections.emptyList();
     }
 
     // Deprecated RN 0.47
@@ -34,11 +27,8 @@ public class RCTCountDownPackage implements ReactPackage {
 
     @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-        if (mCountDownViewManager == null) {
-            mCountDownViewManager = new RCTCountDownViewManager(reactContext);
-        }
         return Arrays.<ViewManager>asList(
-            mCountDownViewManager
+                new RCTCountDownViewManager(reactContext)
         );
     }
 }

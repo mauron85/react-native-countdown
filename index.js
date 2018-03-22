@@ -1,7 +1,11 @@
 var React = require('react');
+var ReactNative = require('react-native');
 var PropTypes = require('prop-types');
-var { requireNativeComponent, NativeModules, DeviceEventEmitter, ViewPropTypes } = require('react-native');
-var CountDown = NativeModules.CountDown;
+var {
+  requireNativeComponent,
+  UIManager,
+  ViewPropTypes
+} = ReactNative;
 
 class CountDownView extends React.Component {
   constructor(props) {
@@ -10,15 +14,21 @@ class CountDownView extends React.Component {
   }
 
   componentWillUnmount() {
-    CountDown.stop();
+    this.stop();
   }
 
   start() {
-    CountDown.start();
+    UIManager.dispatchViewManagerCommand(
+      ReactNative.findNodeHandle(this),
+      UIManager.CountDownView.Commands.start, []
+    );
   }
 
   stop() {
-    CountDown.stop();
+    UIManager.dispatchViewManagerCommand(
+      ReactNative.findNodeHandle(this),
+      UIManager.CountDownView.Commands.stop, []
+    );
   }
 
   onChange(event) {
@@ -30,7 +40,12 @@ class CountDownView extends React.Component {
   }
 
   render() {
-    return <RCTCountDownView {...this.props} onChange={this.onChange} />;
+    return <RCTCountDownView { ...this.props
+    }
+    onChange = {
+      this.onChange
+    }
+    />;
   }
 }
 
@@ -46,7 +61,9 @@ CountDownView.propTypes = {
 };
 
 var RCTCountDownView = requireNativeComponent('CountDownView', CountDownView, {
-  nativeOnly: { onChange: true }
+  nativeOnly: {
+    onChange: true
+  }
 });
 
 module.exports = CountDownView;

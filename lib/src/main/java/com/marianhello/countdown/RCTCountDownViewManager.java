@@ -3,8 +3,10 @@ package com.marianhello.countdown;
 import android.graphics.Color;
 import android.support.annotation.Nullable;
 
+import com.facebook.infer.annotation.Assertions;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -17,9 +19,10 @@ import java.util.Map;
  */
 
 public class RCTCountDownViewManager extends SimpleViewManager<RCTNeonCountDownView> {
-    private RCTNeonCountDownView mCountDownView;
-
     public static final String REACT_CLASS = "CountDownView";
+
+    public static final int COMMAND_START = 1;
+    public static final int COMMAND_STOP = 2;
 
     public RCTCountDownViewManager(ReactApplicationContext reactContext) {
         super();
@@ -43,8 +46,40 @@ public class RCTCountDownViewManager extends SimpleViewManager<RCTNeonCountDownV
 
     @Override
     protected RCTNeonCountDownView createViewInstance(ThemedReactContext reactContext) {
-        mCountDownView = new RCTNeonCountDownView(reactContext);
-        return mCountDownView;
+        return new RCTNeonCountDownView(reactContext);
+    }
+
+    @Override
+    public Map<String, Integer> getCommandsMap() {
+        return MapBuilder.of(
+                "start",
+                COMMAND_START,
+                "stop",
+                COMMAND_STOP);
+    }
+
+    @Override
+    public void receiveCommand(
+            RCTNeonCountDownView view,
+            int commandType,
+            @Nullable ReadableArray args) {
+        Assertions.assertNotNull(view);
+        Assertions.assertNotNull(args);
+        switch (commandType) {
+            case COMMAND_START: {
+                view.startCountDown();
+                return;
+            }
+            case COMMAND_STOP: {
+                view.stopCountDown();
+                return;
+            }
+            default:
+                throw new IllegalArgumentException(String.format(
+                        "Unsupported command %d received by %s.",
+                        commandType,
+                        getClass().getSimpleName()));
+        }
     }
 
     @ReactProp(name = "millisInFuture")
@@ -87,10 +122,6 @@ public class RCTCountDownViewManager extends SimpleViewManager<RCTNeonCountDownV
         if (colorString != null) {
             view.setMinuteColorDim(toIntColor(colorString));
         }
-    }
-
-    public RCTNeonCountDownView getNeonCountDownViewInstance() {
-        return mCountDownView;
     }
 
     private static int toIntColor(String colorString) {
