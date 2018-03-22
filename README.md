@@ -3,7 +3,7 @@
 
 currently Android only
 
-![Android screenshot](/screen.png "screenshot of plugin running on Android")
+![Android screenshot](/screencast.gif "screenshot of plugin running on Android")
 
 
 # Install
@@ -33,7 +33,7 @@ dependencies {
 
 # Example
 
-```
+```javascript
 import React, { Component } from 'react';
 import { StyleSheet, View, Button } from 'react-native';
 import CountDownView from 'react-native-mauron85-countdown';
@@ -65,12 +65,14 @@ export default class CountDown extends Component {
       <View style={styles.container}>
         <CountDownView
           style={styles.countdown}
-          millisInFuture={140000}
+          millisInFuture={3014000}
           intervalMillis={1000}
           secondColor="#f57df5"
           secondColorDim="#aaaaaa"
           minuteColor="#00bfff"
           minuteColorDim="#cccccc"
+          textColor="#ffffff"
+          textSize={30}
           onFinish={this.onFinish}
           ref={(component) => { this.countDown = component; }}
         />

@@ -124,6 +124,20 @@ public class RCTCountDownViewManager extends SimpleViewManager<RCTNeonCountDownV
         }
     }
 
+    @ReactProp(name = "textColor")
+    public void setTextColor(RCTNeonCountDownView view, @Nullable String colorString) {
+        if (colorString != null) {
+            view.setTextColor(toIntColor(colorString));
+        }
+    }
+
+    @ReactProp(name = "textSize")
+    public void setTextSize(RCTNeonCountDownView view, @Nullable Integer size) {
+        if (size != null) {
+            view.setTextSize(size);
+        }
+    }
+
     private static int toIntColor(String colorString) {
         return Color.parseColor(colorString);
     }

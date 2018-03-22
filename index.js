@@ -55,6 +55,8 @@ CountDownView.propTypes = {
   secondColorDim: PropTypes.string,
   minuteColor: PropTypes.string,
   minuteColorDim: PropTypes.string,
+  textColor: PropTypes.string,
+  textSize: PropTypes.number,
   intervalMillis: PropTypes.number,
   onFinish: PropTypes.func,
   ...ViewPropTypes,

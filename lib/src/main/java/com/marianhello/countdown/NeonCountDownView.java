@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.richpath.RichPath;
 import com.richpath.RichPathView;
@@ -33,6 +34,7 @@ public class NeonCountDownView extends LinearLayout {
 
     private CountDownTimer mCountDownTimer;
     private RichPathView mNeonClockView;
+    private TextView mTimeView;
 
     private static final int RING_SECONDS = 0;
     private static final int RING_MINUTES = 1;
@@ -45,7 +47,7 @@ public class NeonCountDownView extends LinearLayout {
     }
 
     public NeonCountDownView(Context context, AttributeSet attrs) {
-        this(context, attrs,0);
+        this(context, attrs, 0);
     }
 
     public NeonCountDownView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -64,7 +66,7 @@ public class NeonCountDownView extends LinearLayout {
         mMillisInFuture = 0;
         mCurrentMillisInFuture = 0;
         mIntervalMillis = DEFAULT_INTERVAL_MILLIS;
-        mClock = new int[]{0, 0, 0};
+        mClock = new int[]{0, 0, 0, 0};
 
         mSecondColor = Color.parseColor(DEFAULT_SECOND_COLOR);
         mMinuteColor = Color.parseColor(DEFAULT_MINUTE_COLOR);
@@ -74,9 +76,10 @@ public class NeonCountDownView extends LinearLayout {
         //Inflate xml resource, pass "this" as the parent, we use <merge> tag in xml to avoid
         //redundant parent, otherwise a LinearLayout will be added to this LinearLayout ending up
         //with two view groups
-        inflate(getContext(), R.layout.view_neon_countdown,this);
+        inflate(getContext(), R.layout.view_neon_countdown, this);
 
         mNeonClockView = (RichPathView) findViewById(R.id.neon_clock);
+        mTimeView = findViewById(R.id.time_text);
     }
 
     protected void runOnUiThread(Runnable runnable) {
@@ -107,51 +110,56 @@ public class NeonCountDownView extends LinearLayout {
     }
 
     protected void highlightClockInterval(final int from, final int to, final int clockRing) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = from; i < to; i++) {
-                    RichPath richPath = mNeonClockView.findRichPathByIndex(getClockPathIndex(i, clockRing));
-                    richPath.setFillColor(getClockColor(clockRing, true));
-                }
-            }
-        });
+        for (int i = from; i < to; i++) {
+            RichPath richPath = mNeonClockView.findRichPathByIndex(getClockPathIndex(i, clockRing));
+            richPath.setFillColor(getClockColor(clockRing, true));
+        }
     }
 
     protected void dimClockInterval(final int from, final int to, final int clockRing) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = from; i < to; i++) {
-                    RichPath richPath = mNeonClockView.findRichPathByIndex(getClockPathIndex(i, clockRing));
-                    richPath.setFillColor(getClockColor(clockRing, false));
-                }
-            }
-        });
+        for (int i = from; i < to; i++) {
+            RichPath richPath = mNeonClockView.findRichPathByIndex(getClockPathIndex(i, clockRing));
+            richPath.setFillColor(getClockColor(clockRing, false));
+        }
+    }
+
+    protected void updateClockTime(int hours, int minutes, int seconds) {
+        String time = padLeft(hours) + ":" + padLeft(minutes) + ":" + padLeft(seconds);
+        mTimeView.setText(time);
     }
 
     protected void render(long millisUntilFinished) {
-        int[] previousClock = mClock;
+        final int[] previousClock = mClock;
         setClock(millisUntilFinished);
 
-        for (int i = 0; i < 2; i++) {
-            int previousClockVal = previousClock[i];
-            int currentClockVal = mClock[i];
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < 2; i++) {
+                    int previousClockVal = previousClock[i];
+                    int currentClockVal = mClock[i];
 
-            if (currentClockVal < previousClockVal) {
-                // eg. 45s -> 30s => dimClockInterval(31, 45, i)
-                dimClockInterval(currentClockVal, previousClockVal, i);
-            } else if (currentClockVal > previousClockVal) {
-                // we started new minute/hour/..
-                // eg. 1:05s -> 0:50 =>
-                // eg. 1:45s -> 0:50s =>
-                highlightClockInterval(previousClockVal, currentClockVal, i);
+                    if (currentClockVal < previousClockVal) {
+                        // eg. 45s -> 30s => dimClockInterval(31, 45, i)
+                        dimClockInterval(currentClockVal, previousClockVal, i);
+                    } else if (currentClockVal > previousClockVal) {
+                        // we started new minute/hour/..
+                        // eg. 1:05s -> 0:50 =>
+                        // eg. 1:45s -> 0:50s =>
+                        highlightClockInterval(previousClockVal, currentClockVal, i);
+                    }
+                }
+                updateClockTime(mClock[3], mClock[1], mClock[0]);
             }
-        }
+        });
     }
 
     protected void onFinish() {
         // override in child
+    }
+
+    public static String padLeft(int number) {
+        return String.format("%02d", number);
     }
 
     private void setClock(long millisInFuture) {
@@ -194,6 +202,14 @@ public class NeonCountDownView extends LinearLayout {
 
     public void setInterval(int millis) {
         mIntervalMillis = millis;
+    }
+
+    public void setTextColor(int color) {
+        mTimeView.setTextColor(color);
+    }
+
+    public void setTextSize(float size) {
+        mTimeView.setTextSize(size);
     }
 
     public synchronized void startCountDown() {
