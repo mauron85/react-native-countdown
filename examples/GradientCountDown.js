@@ -2,47 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, View, Button } from 'react-native';
 import CountDownView from 'react-native-mauron85-countdown';
 
-function rgbToHex([r, g, b]) {
-  return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-}
-
-function hexToRgb(hex) {
-  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? [
-        parseInt(result[1], 16),
-        parseInt(result[2], 16),
-        parseInt(result[3], 16)
-      ]
-    : null;
-}
-
-// Returns a single rgb color interpolation between given rgb color
-// based on the factor given; via https://codepen.io/njmcode/pen/axoyD?editors=0010
-function interpolateColor(color1, color2, factor) {
-  if (arguments.length < 3) {
-    factor = 0.5;
-  }
-  var result = color1.slice();
-  for (var i = 0; i < 3; i++) {
-    result[i] = Math.round(result[i] + factor * (color2[i] - color1[i]));
-  }
-  return result;
-}
-
-// https://graphicdesign.stackexchange.com/questions/83866/generating-a-series-of-colors-between-two-colors
-function interpolateColors(color1, color2, steps) {
-  var stepFactor = 1 / (steps - 1),
-    interpolatedColorArray = [];
-
-  for (var i = 0; i < steps; i++) {
-    interpolatedColorArray.push(
-      rgbToHex(interpolateColor(color1, color2, stepFactor * i))
-    );
-  }
-
-  return interpolatedColorArray;
-}
+const GRADIENT_STEPS = 30;
 
 export default class CountDown extends Component {
   constructor(props) {
@@ -53,13 +13,13 @@ export default class CountDown extends Component {
     this.onTick = this.onTick.bind(this);
 
     this.gradients = [
-      interpolateColors(hexToRgb('#ff1a00'), hexToRgb('#ef017c'), 60),
-      interpolateColors(hexToRgb('#00bfff'), hexToRgb('#ef017c'), 60),
+      interpolateColors(hexToRgb('#00bfff'), hexToRgb('#ef017c'), GRADIENT_STEPS),
+      interpolateColors(hexToRgb('#00bfff'), hexToRgb('#ef017c'), GRADIENT_STEPS),
     ];
 
-    const hours = 2;
-    const minutes = 5;
-    const seconds = 10;
+    const hours = 0;
+    const minutes = 30;
+    const seconds = 15;
     const millisInFuture = (hours * 60 * 60 + minutes * 60 + seconds) * 1000;
     const clock = this._getClock(millisInFuture);
 
@@ -87,8 +47,15 @@ export default class CountDown extends Component {
   }
 
   _getGradientColor(interval, gradientIndex) {
-    const index = interval % this.gradients[gradientIndex].length;
-    return this.gradients[gradientIndex][index];
+    let index;
+    if (interval >= GRADIENT_STEPS) {
+      // we need to reverse gradient to make color transition smooth
+      index = (2 * GRADIENT_STEPS - interval);
+    } else {
+      index = interval;
+    }
+    const gradient = this.gradients[gradientIndex];
+    return gradient[index];
   }
 
   onPress() {
@@ -164,3 +131,46 @@ const styles = StyleSheet.create({
     marginBottom: 20
   }
 });
+
+
+function rgbToHex([r, g, b]) {
+  return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+function hexToRgb(hex) {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? [
+        parseInt(result[1], 16),
+        parseInt(result[2], 16),
+        parseInt(result[3], 16)
+      ]
+    : null;
+}
+
+// Returns a single rgb color interpolation between given rgb color
+// based on the factor given; via https://codepen.io/njmcode/pen/axoyD?editors=0010
+function interpolateColor(color1, color2, factor) {
+  if (arguments.length < 3) {
+    factor = 0.5;
+  }
+  var result = color1.slice();
+  for (var i = 0; i < 3; i++) {
+    result[i] = Math.round(result[i] + factor * (color2[i] - color1[i]));
+  }
+  return result;
+}
+
+// https://graphicdesign.stackexchange.com/questions/83866/generating-a-series-of-colors-between-two-colors
+function interpolateColors(color1, color2, steps) {
+  var stepFactor = 1 / (steps - 1),
+    interpolatedColorArray = [];
+
+  for (var i = 0; i < steps; i++) {
+    interpolatedColorArray.push(
+      rgbToHex(interpolateColor(color1, color2, stepFactor * i))
+    );
+  }
+
+  return interpolatedColorArray;
+}
