@@ -32,10 +32,14 @@ class CountDownView extends React.Component {
   }
 
   onChange(event) {
-    if (event.nativeEvent.message === 'finish') {
-      if (this.props.onFinish) {
-        this.props.onFinish();
-      }
+    var {
+      message,
+      payload
+    } = event.nativeEvent;
+    if (message === 'finish') {
+      typeof this.props.onFinish === 'function' && this.props.onFinish();
+    } else if (message === 'tick') {
+      typeof this.props.onTick === 'function' && this.props.onTick(payload);
     }
   }
 
@@ -59,6 +63,7 @@ CountDownView.propTypes = {
   textSize: PropTypes.number,
   intervalMillis: PropTypes.number,
   onFinish: PropTypes.func,
+  onTick: PropTypes.func,
   ...ViewPropTypes,
 };
 

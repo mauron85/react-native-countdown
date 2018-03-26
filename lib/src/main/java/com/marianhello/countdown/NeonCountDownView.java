@@ -66,7 +66,7 @@ public class NeonCountDownView extends LinearLayout {
         mMillisInFuture = 0;
         mCurrentMillisInFuture = 0;
         mIntervalMillis = DEFAULT_INTERVAL_MILLIS;
-        mClock = new int[]{0, 0, 0, 0};
+        mClock = new int[]{0, 0, 0, 0, 0, 0};
 
         mSecondColor = Color.parseColor(DEFAULT_SECOND_COLOR);
         mMinuteColor = Color.parseColor(DEFAULT_MINUTE_COLOR);
@@ -130,7 +130,28 @@ public class NeonCountDownView extends LinearLayout {
 
     protected void render(long millisUntilFinished) {
         final int[] previousClock = mClock;
-        setClock(millisUntilFinished);
+
+        if (millisUntilFinished != mCurrentMillisInFuture) {
+            int secondsInFuture = (int) Math.floor(millisUntilFinished / 1000);
+            int hours = (int) Math.floor(secondsInFuture / HOUR_IN_SECONDS);
+            int hours12 = (int) Math.min(hours, 12);
+            int minutes = (int) Math.floor((secondsInFuture - hours * HOUR_IN_SECONDS) / 60);
+            int seconds = (int) secondsInFuture % 60;
+            int dMinutes = minutes;
+            int dSeconds = seconds;
+
+            if (seconds == 0) {
+                if (minutes > 0 || hours > 0) {
+                    seconds = 60;
+                }
+                if (minutes == 0 && hours > 0) {
+                    minutes = 60;
+                }
+            }
+
+            mCurrentMillisInFuture = millisUntilFinished;
+            mClock = new int[]{seconds, minutes, hours12, hours, dMinutes, dSeconds};
+        }
 
         runOnUiThread(new Runnable() {
             @Override
@@ -149,7 +170,7 @@ public class NeonCountDownView extends LinearLayout {
                         highlightClockInterval(previousClockVal, currentClockVal, i);
                     }
                 }
-                updateClockTime(mClock[3], mClock[1], mClock[0]);
+                updateClockTime(mClock[3], mClock[4], mClock[5]);
             }
         });
     }
@@ -158,21 +179,12 @@ public class NeonCountDownView extends LinearLayout {
         // override in child
     }
 
-    public static String padLeft(int number) {
-        return String.format("%02d", number);
+    protected void onTick(long millisUntilFinished) {
+        // override in child
     }
 
-    private void setClock(long millisInFuture) {
-        if (millisInFuture != mCurrentMillisInFuture) {
-            int secondsInFuture = (int) Math.floor(millisInFuture / 1000);
-            int hours = (int) Math.floor(secondsInFuture / HOUR_IN_SECONDS);
-            int hours12 = (int) Math.min(hours, 12);
-            int minutes = (int) Math.floor((secondsInFuture - hours * HOUR_IN_SECONDS) / 60);
-            int seconds = (int) secondsInFuture % 60;
-
-            mCurrentMillisInFuture = millisInFuture;
-            mClock = new int[]{seconds, minutes, hours12, hours};
-        }
+    public static String padLeft(int number) {
+        return String.format("%02d", number);
     }
 
     public void setMillisInFuture(long millisInFuture) {
@@ -182,12 +194,12 @@ public class NeonCountDownView extends LinearLayout {
 
     public void setSecondColor(int color) {
         mSecondColor = color;
-        render(mMillisInFuture);
+        highlightClockInterval(0, mClock[0], RING_SECONDS);
     }
 
     public void setMinuteColor(int color) {
         mMinuteColor = color;
-        render(mMillisInFuture);
+        highlightClockInterval(0, mClock[1], RING_MINUTES);
     }
 
     public void setSecondColorDim(int color) {
@@ -220,6 +232,7 @@ public class NeonCountDownView extends LinearLayout {
         mCountDownTimer = new CountDownTimer(mCurrentMillisInFuture, mIntervalMillis) {
             public void onTick(long millisUntilFinished) {
                 render(millisUntilFinished);
+                NeonCountDownView.this.onTick(millisUntilFinished);
             }
 
             public void onFinish() {

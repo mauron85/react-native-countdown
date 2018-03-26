@@ -101,3 +101,5 @@ const styles = StyleSheet.create({
   }
 });
 ```
+
+More examples can be found in [examples](/examples) directory.
